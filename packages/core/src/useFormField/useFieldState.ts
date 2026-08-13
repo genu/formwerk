@@ -318,7 +318,10 @@ function createFormBlurredRef(getPath: Getter<string | undefined>, form: FormCon
 
   function setBlurred(value: boolean) {
     const path = getPath();
-    const isDifferent = pathlessBlurred.value !== value;
+    // Compare against the form's authoritative state when the field is path-bound, the local
+    // `pathlessBlurred` cache can go stale (e.g. `form.reset()` clears the form's blurred map
+    // without notifying the field), which would otherwise skip the update forever.
+    const isDifferent = path ? form.isBlurred(path) !== value : pathlessBlurred.value !== value;
     pathlessBlurred.value = value;
     // Only update it if the value is actually different, this avoids unnecessary path traversal/creation
     if (path && isDifferent) {

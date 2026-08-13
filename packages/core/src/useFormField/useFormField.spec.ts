@@ -19,7 +19,11 @@ test('it initializes the field value in a form', async () => {
       return { form };
     },
     () => {
-      const field = useFormField({ label: 'Field', path: 'field', initialValue: 'bar' }).state;
+      const field = useFormField({
+        label: 'Field',
+        path: 'field',
+        initialValue: 'bar',
+      }).state;
 
       return { field };
     },
@@ -36,7 +40,11 @@ test('overrides the initial value in the form with its own', async () => {
       return { form };
     },
     () => {
-      const field = useFormField({ label: 'Field', path: 'field', initialValue: 'bar' }).state;
+      const field = useFormField({
+        label: 'Field',
+        path: 'field',
+        initialValue: 'bar',
+      }).state;
 
       return { field };
     },
@@ -408,4 +416,30 @@ describe('isValidated state', () => {
     expect(field1.state.isValidated.value).toBe(true);
     expect(field2.state.isValidated.value).toBe(true);
   });
+});
+
+test('setBlurred still updates the field after the form is reset', async () => {
+  const { form, field } = await renderSetup(
+    () => {
+      const form = useForm({ initialValues: { field: 'foo' } });
+
+      return { form };
+    },
+    () => {
+      const field = useFormField({ label: 'Field', path: 'field' }).state;
+
+      return { field };
+    },
+  );
+
+  field.setBlurred(true);
+  expect(field.isBlurred.value).toBe(true);
+
+  // Reset clears the form's blurred state.
+  form.reset();
+  expect(field.isBlurred.value).toBe(false);
+
+  // Blurring again should take effect, the field must not rely on a stale local cache.
+  field.setBlurred(true);
+  expect(field.isBlurred.value).toBe(true);
 });
